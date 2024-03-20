@@ -1,6 +1,6 @@
 # voxsay2
 
-音声合成製品 VOICEVOX、VOICEVOX Nemo、COEIROINK/v2、LMROID、SHAREVOX、ITVOICE、 のREST APIを呼び出して音声再生するWindows用のCUIクライアント
+音声合成製品 VOICEVOX、VOICEVOX Nemo、COEIROINK/v2、LMROID、SHAREVOX、ITVOICE、 のREST APIを呼び出して音声再生するCUIクライアント
 
 ## 使用方法
 
