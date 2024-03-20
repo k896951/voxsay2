@@ -1,0 +1,29 @@
+{
+  "defaultSetting": {
+    "prod": "voicevox",
+    "host": null,
+    "port": null,
+    "speed": null,
+    "pitch": null,
+    "intonation": null,
+    "volume": null,
+    "prephonemelength": 0.50,
+    "postphonemelength": 0.50,
+    "samplingrate": 24000,
+    "index": null,
+    "renderingmode": "talk",
+    "mf": null,
+    "sf": null
+  },
+
+  "soundSetting": {
+    "method": "dotnet",
+    "command": "D:\\Program Files (x86)\\sox-14-4-2\\sox.exe",
+    "frontopts": [
+      "-q"
+    ],
+    "rearopts": [
+      "-d"
+    ]
+  }
+}

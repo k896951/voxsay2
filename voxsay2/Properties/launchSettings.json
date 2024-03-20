@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "voxsay2": {
+      "commandName": "Project",
+      "commandLineArgs": "-index 48 -t うぉおおお"
+    }
+  }
+}
