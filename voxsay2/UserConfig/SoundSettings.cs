@@ -16,6 +16,9 @@ namespace voxsay2
         [DataMember(Name = "command")]
         public string Command { get; set; }
 
+        [DataMember(Name = "audiodriver")]
+        public string AudioDriver { get; set; }
+
         [DataMember(Name = "frontopts")]
         public string[] FrontOpts { get; set; }
 
@@ -28,6 +31,7 @@ namespace voxsay2
             RearOpts = [ "-d" ];
             Command = "sox";
             Method = "method";
+            AudioDriver = "waveaudio";
         }
     }
 }

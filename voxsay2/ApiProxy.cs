@@ -941,7 +941,7 @@ namespace voxsay2
                     case "sox":
                         var si = new ProcessStartInfo();
                         si.FileName = PlayMethod.Command;
-                        si.Environment.Add("AUDIODRIVER", "waveaudio");
+                        si.Environment.Add("AUDIODRIVER", PlayMethod.AudioDriver);
                         foreach(var item in PlayMethod.FrontOpts) si.ArgumentList.Add(item);
                         si.ArgumentList.Add(WavFilePath);
                         foreach (var item in PlayMethod.RearOpts) si.ArgumentList.Add(item);

@@ -159,6 +159,7 @@ voxsay2.exeと同じフォルダに作成したJSONファイル voxsay2conf.json
   "soundSetting": {
     "method": "dotnet",
     "command": "sox",
+    "audiodriver": "waveaudio",
     "frontopts": [
       "-q"
     ],
@@ -182,6 +183,7 @@ voxsay2conf.jsonのプロパティ soundSetting の設定は、音声再生方�
 ```
   "soundSetting": {
     "method": "dotnet",
+    "audiodriver": "",
     "command": "",
     "frontopts": [],
     "rearopts": []
@@ -195,6 +197,7 @@ voxsay2conf.jsonのプロパティ soundSetting の設定は、音声再生方�
   "soundSetting": {
     "method": "sox",
     "command": "sox",
+    "audiodriver": "waveaudio",
     "frontopts": [
       "-q"
     ],
@@ -214,6 +217,7 @@ WindowsでもWin版soxコマンドをインストールして利用が可能で�
   "soundSetting": {
     "method": "sox",
     "command": "D:\\Program Files (x86)\\sox-14-4-2\\sox.exe",
+    "audiodriver": "waveaudio",
     "frontopts": [
       "-q"
     ],

@@ -18,12 +18,9 @@
 
   "soundSetting": {
     "method": "dotnet",
-    "command": "sox",
-    "frontopts": [
-      "-q"
-    ],
-    "rearopts": [
-      "-d"
-    ]
+    "command": "",
+    "audiodriver": "",
+    "frontopts": [],
+    "rearopts": []
   }
 }
