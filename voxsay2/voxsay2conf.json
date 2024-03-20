@@ -18,7 +18,7 @@
 
   "soundSetting": {
     "method": "dotnet",
-    "command": "D:\\Program Files (x86)\\sox-14-4-2\\sox.exe",
+    "command": "sox",
     "frontopts": [
       "-q"
     ],

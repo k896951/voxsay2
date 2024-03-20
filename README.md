@@ -1,27 +1,25 @@
-# voxsay
+# voxsay2
 
 音声合成製品 VOICEVOX、VOICEVOX Nemo、COEIROINK/v2、LMROID、SHAREVOX、ITVOICE、 のREST APIを呼び出して音声再生するWindows用のCUIクライアント
 
 ## 使用方法
 
-[こちら](https://github.com/k896951/voxsay/wiki)を参照してください。
+[こちら](https://github.com/k896951/voxsay/wiki)を参照してください。voxsayとほぼ同じです。
 
 使用前に、各音声合成製品を起動します。
-その後にvoxsay.exeをオプション無しで実行するとヘルプが出ます。
+その後にvoxsay2.exeをオプション無しで実行するとヘルプが出ます。
 ```
-f:\sandbox>voxsay
+f:\sandbox>voxsay2
 
-voxsay command 1.1.20 (c)2022,2023,2024 by k896951
+voxsay command 2.0.0 (c)2022,2023,2024 by k896951
 
 talk command line exsamples:
-    voxsay -devlist
     voxsay -prodlist
     voxsay <-prod TTS> [Options1] -list
     voxsay <-prod TTS> [Options1] [-save FILENAME] <-index N> [Options2] -t  TALKTEXT
     voxsay <-prod TTS> [Options1] [-save FILENAME] <-index N> [Options2] [ -mf | -sf ] TEXTFILE
 
 sing command line exsamples (VOICEVOX ONLY):
-    voxsay -devlist
     voxsay -prod voicevox -renderingmode sing [Options1] -list
     voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] -t  TALKTEXT
     voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] [ -mf | -sf ] TEXTFILE
@@ -40,14 +38,12 @@ help command line for Options1, Options2:
     voxsay -help talk
     voxsay -help sing
 
-
 f:\sandbox>
 ```
 
 ローカルで稼働している製品一覧を確認します。
 ```
-f:\sandbox>voxsay -prodlist
-product: sapi
+f:\sandbox>voxsay2 -prodlist
 product: sharevox
 product: voicevox
 product: coeiroinkv2
@@ -57,7 +53,7 @@ f:\sandbox>
 
 SHAREVOXの話者一覧でインデクスを確認します。
 ```
-f:\sandbox>voxsay -prod sharevox -list
+f:\sandbox>voxsay2 -prod sharevox -list
 index: 0,  speaker:小春音アミ（ノーマル）
 index: 1,  speaker:小春音アミ（喜び）
 index: 2,  speaker:小春音アミ（怒り）
@@ -91,7 +87,7 @@ f:\sandbox>
 鈴乃（ノーマル）に呟いてもらいます。
 
 ```
-f:\sandbox>voxsay -prod sharevox -index 25 -t 早く寝てください！
+f:\sandbox>voxsay2 -prod sharevox -index 25 -t 早く寝てください！
 
 f:\sandbox>
 ```
@@ -99,7 +95,7 @@ f:\sandbox>
 音量が大きい気がしたので下げます。
 
 ```
-f:\sandbox>voxsay -prod sharevox -index 25 -volume 0.5 -t 早く寝てください！
+f:\sandbox>voxsay2 -prod sharevox -index 25 -volume 0.5 -t 早く寝てください！
 
 f:\sandbox>
 ```
@@ -107,7 +103,7 @@ f:\sandbox>
 オプション -prod voicevox, -renderingmode sing, を指定すると、VOICEVOX 0.16.1で利用可能になった歌唱APIを使って歌わせることができます。
 話者一覧でインデクスを確認します。-renderingmode talk の時と番号が異なるので注意してください。
 ```
-f:\sandbox>voxsay -prod voicevox -renderingmode sing -renderingmode sing -list
+f:\sandbox>voxsay2 -prod voicevox -renderingmode sing -renderingmode sing -list
 index: 3000,  speaker:四国めたん（あまあま）
 index: 3001,  speaker:ずんだもん（あまあま）
 index: 3002,  speaker:四国めたん（ノーマル）
@@ -125,7 +121,7 @@ f:\sandbox>
 ```
 春日部つむぎにドレミファソラシドを歌ってもらいましょう。
 ```
-f:\sandbox>voxsay -prod voicevox -renderingmode sing -index 3008 -t O4CDEFGABO5C
+f:\sandbox>voxsay2 -prod voicevox -renderingmode sing -index 3008 -t O4CDEFGABO5C
 
 f:\sandbox>
 ```
@@ -134,97 +130,103 @@ f:\sandbox>
 
 ### 定義ファイル
 
-オプションのいくつかは、voxsay.exeと同じフォルダに作成したJSONファイル voxsayconf.json で省略できます。
+voxsay2.exeと同じフォルダに作成したJSONファイル voxsay2conf.json に定義をします。
 ```
 {
-	"prod":"voicevoxnemo",
-	"index":10003,
-	"speed":1.5,
-	"outputdevice":"EX-LDGC242HT (NVIDIA High Definition Audio)"
+  "defaultSetting": {
+    "prod": "voicevox",
+    "host": null,
+    "port": null,
+    "speed": null,
+    "pitch": null,
+    "intonation": null,
+    "volume": null,
+    "prephonemelength": 0.50,
+    "postphonemelength": 0.50,
+    "samplingrate": 24000,
+    "index": null,
+    "renderingmode": "talk",
+    "mf": null,
+    "sf": null
+  },
+
+  "soundSetting": {
+    "method": "dotnet",
+    "command": "sox",
+    "frontopts": [
+      "-q"
+    ],
+    "rearopts": [
+      "-d"
+    ]
+  }
 }
 ```
-この例だと、オプションを指定して上書きしない限り、voxsay は
+この例だと、オプションを指定して上書きしない限り、voxsay2 は
 ```
--prod voicevoxnemo -speed 1.5 -outputdevice "EX-LDGC242HT (NVIDIA High Definition Audio)" -index 10003
+-prod voicevox -prephonemelength 0.50 -postphonemelength 0.50 -samplingrate 24000 -renderingmode talk
 ```
 が指定されたものとして動作します。
+
+#### 再生方法指定
+
+voxsay2conf.jsonのプロパティ soundSetting の設定は、音声再生方法の指定になります。
+
+"method"が"dotnet"の時は.NETがSystem.Windows.Extensionsで提供する System.media.SoundPlayerクラスを使って再生します。
+```
+  "soundSetting": {
+    "method": "dotnet",
+    "command": "",
+    "frontopts": [],
+    "rearopts": []
+  }
+```
+
+現状、System.media.SoundPlayerクラスはWindowsでのみ機能すると警告されていますが私はそれを確認できません。
+
+その為、"method"を"sox"にした際は、外部コマンド sox を利用した再生を行うようにしてあります。
+```
+  "soundSetting": {
+    "method": "sox",
+    "command": "sox",
+    "frontopts": [
+      "-q"
+    ],
+    "rearopts": [
+      "-d"
+    ]
+  }
+```
+
+この例は、取得した音声ファイルを以下のコマンドラインでバックグラウンド実行します。
+```
+sox -q 音声ファイル -d
+```
+
+WindowsでもWin版soxコマンドをインストールして利用が可能です。
+```
+  "soundSetting": {
+    "method": "sox",
+    "command": "D:\\Program Files (x86)\\sox-14-4-2\\sox.exe",
+    "frontopts": [
+      "-q"
+    ],
+    "rearopts": [
+      "-d"
+    ]
+  }
+```
+
+この例は、取得した音声ファイルを以下のコマンドラインでバックグラウンド実行します。
+```
+D:\Program Files (x86)\sox-14-4-2\sox.exe -q 音声ファイル -d
+```
 
 
 ## 使用しているサードパーティライブラリとライセンス
 
-### Fody
-
-以下は各ライセンスで提供されています。
-
-- Costura.Fody	5.7.0	geertvanhorrik,simoncropp	MIT
-- Fody	6.8.0	Fody	https://www.nuget.org/packages/Fody/6.8.0/license
-
-### NAudio
-
-以下は各ライセンスで提供されています。
-
-- NAudio	2.2.0	Mark Heath & Contributors	https://www.nuget.org/packages/NAudio/2.2.0/license
-- NAudio.Asio	2.2.0	Mark Heath	MIT
-- NAudio.Core	2.2.0	Mark Heath	MIT
-- NAudio.Midi	2.2.0	Mark Heath	MIT
-- NAudio.Wasapi	22.0.0	Mark Heath	MIT
-- NAudio.WinForms	2.2.0	Mark Heath	MIT
-- NAudio.WinMM	2.2.0	WinMM	MIT
-
 ### Microsoft
 
-以下は MITライセンスもしくは https://dotnet.microsoft.com/ja-jp/dotnet_library_license.htm で示すライセンスで提供されています。
+以下は MITライセンスで提供されています。
 
-- Microsoft.Win32.Registry	5.0.0
-- Microsoft.NETCore.Platforms	7.0.4
-- Microsoft.Win32.Primitives	4.3.0
-- NETStandard.Library	2.0.3
-- System.AppContext	4.3.0
-- System.Buffers	4.5.1
-- System.Collections	4.3.0
-- System.Collections.Concurrent	4.3.0
-- System.Console	4.3.1
-- System.Diagnostics.Debug	4.3.0
-- System.Diagnostics.DiagnosticSource	7.0.2
-- System.Diagnostics.Tools	4.3.0
-- System.Diagnostics.Tracing	4.3.0
-- System.Globalization	4.3.0
-- System.Globalization.Calendars	4.3.0
-- System.IO	4.3.0
-- System.IO.Compression	4.3.0
-- System.IO.Compression.ZipFile	4.3.0
-- System.IO.FileSystem	4.3.0
-- System.IO.FileSystem.Primitives	4.3.0
-- System.Linq	4.3.0
-- System.Linq.Expressions	4.3.0
-- System.Memory	4.5.5
-- System.Net.Http	4.3.4
-- System.Net.Primitives	4.3.1
-- System.Net.Sockets	4.3.0
-- System.Numerics.Vectors	4.5.0
-- System.ObjectModel	4.3.0
-- System.Reflection	4.3.0
-- System.Reflection.Extensions	4.3.0
-- System.Reflection.Primitives	4.3.0
-- System.Resources.ResourceManager	4.3.0
-- System.Runtime	4.3.1
-- System.Runtime.CompilerServices.Unsafe	6.0.0
-- System.Runtime.Extensions	4.3.1
-- System.Runtime.Handles	4.3.0
-- System.Runtime.InteropServices	4.3.0
-- System.Runtime.InteropServices.RuntimeInformation	4.3.0
-- System.Runtime.Numerics	4.3.0
-- System.Security.AccessControl	6.0.0
-- System.Security.Cryptography.Algorithms	4.3.1
-- System.Security.Cryptography.Encoding	4.3.0
-- System.Security.Cryptography.Primitives	4.3.0
-- System.Security.Cryptography.X509Certificates	4.3.2
-- System.Security.Principal.Windows	5.0.0
-- System.Text.Encoding	4.3.0
-- System.Text.Encoding.Extensions	4.3.0
-- System.Text.RegularExpressions	4.3.1
-- System.Threading	4.3.0
-- System.Threading.Tasks	4.3.0
-- System.Threading.Timer	4.3.0
-- System.Xml.ReaderWriter	4.3.1
-- System.Xml.XDocument	4.3.0
+- System.Windows.Extensions	8.0.0
