@@ -181,7 +181,7 @@ voxsay2.exeと同じフォルダに作成したJSONファイル voxsay2conf.json
 
 voxsay2conf.jsonのプロパティ soundSetting の設定は、音声再生方法の指定になります。
 
-"method"が"dotnet"の時は.NETがSystem.Windows.Extensionsで提供する System.media.SoundPlayerクラスを使って再生します。
+"method"が"dotnet"の時は.NETがSystem.Windows.Extensionsで提供する System.Media.SoundPlayerクラスを使って再生します。
 ```
   "soundSetting": {
     "method": "dotnet",
@@ -192,7 +192,7 @@ voxsay2conf.jsonのプロパティ soundSetting の設定は、音声再生方�
   }
 ```
 
-現状、System.media.SoundPlayerクラスはWindowsでのみ機能すると警告されていますが私はそれを確認できません。
+現状、System.Media.SoundPlayerクラスはWindowsでのみ機能すると警告されていますが私はそれを確認できません。
 
 その為、"method"を"sox"にした際は、外部コマンド sox を利用した再生を行うようにしてあります。
 ```
