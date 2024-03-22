@@ -19,7 +19,7 @@
 ```
 f:\sandbox>voxsay2
 
-voxsay command 2.0.0 (c)2022,2023,2024 by k896951
+voxsay command 2.0.0 (c)2024 by k896951
 
 talk command line exsamples:
     voxsay -prodlist
@@ -28,9 +28,10 @@ talk command line exsamples:
     voxsay <-prod TTS> [Options1] [-save FILENAME] <-index N> [Options2] [ -mf | -sf ] TEXTFILE
 
 sing command line exsamples (VOICEVOX ONLY):
+    voxsay -prod voicevox -renderingmode sing [Options1] -teacherlist
     voxsay -prod voicevox -renderingmode sing [Options1] -list
-    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] -t  TALKTEXT
-    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] [ -mf | -sf ] TEXTFILE
+    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [-teacherindex N] [Options2] -t  TALKTEXT
+    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [-teacherindex N] [Options2] [ -mf | -sf ] TEXTFILE
 
 Note:
     * The "-renderingmode sing" option is only for VOICEVOX.
@@ -109,7 +110,16 @@ f:\sandbox>
 ```
 
 オプション -prod voicevox, -renderingmode sing, を指定すると、VOICEVOX 0.16.1で利用可能になった歌唱APIを使って歌わせることができます。
-話者一覧でインデクスを確認します。-renderingmode talk の時と番号が異なるので注意してください。
+
+オプション -teacherlist で歌唱指導歌手のインデクスを確認します。
+```
+f:\sandbox>voxsay2 -prod voicevox -renderingmode sing -teacherlist
+index: 6000,  speaker:波音リツ（ノーマル）
+
+f:\sandbox>
+```
+
+オプション -list で歌手のインデクスを確認します。-renderingmode talk の時と番号が異なるので注意してください。
 ```
 f:\sandbox>voxsay2 -prod voicevox -renderingmode sing -renderingmode sing -list
 index: 3000,  speaker:四国めたん（あまあま）
@@ -123,13 +133,40 @@ index: 3007,  speaker:ずんだもん（ツンツン）
 index: 3008,  speaker:春日部つむぎ（ノーマル）
 index: 3009,  speaker:波音リツ（ノーマル）
 index: 3010,  speaker:雨晴はう（ノーマル）
+index: 3011,  speaker:玄野武宏（ノーマル）
+index: 3012,  speaker:白上虎太郎（ふつう）
+index: 3013,  speaker:青山龍星（ノーマル）
+index: 3014,  speaker:冥鳴ひまり（ノーマル）
+index: 3015,  speaker:九州そら（あまあま）
+index: 3016,  speaker:九州そら（ノーマル）
+index: 3017,  speaker:九州そら（セクシー）
+index: 3018,  speaker:九州そら（ツンツン）
+index: 3020,  speaker:もち子さん（ノーマル）
+index: 3021,  speaker:剣崎雌雄（ノーマル）
+index: 3032,  speaker:白上虎太郎（わーい）
+index: 3033,  speaker:白上虎太郎（びくびく）
+index: 3034,  speaker:白上虎太郎（おこ）
+index: 3035,  speaker:白上虎太郎（びえーん）
+index: 3039,  speaker:玄野武宏（喜び）
+index: 3040,  speaker:玄野武宏（ツンギレ）
+index: 3041,  speaker:玄野武宏（悲しみ）
+index: 3066,  speaker:もち子さん（セクシー／あん子）
+index: 3077,  speaker:もち子さん（泣き）
+index: 3078,  speaker:もち子さん（怒り）
+index: 3079,  speaker:もち子さん（喜び）
+index: 3080,  speaker:もち子さん（のんびり）
+index: 3081,  speaker:青山龍星（熱血）
+index: 3082,  speaker:青山龍星（不機嫌）
+index: 3083,  speaker:青山龍星（喜び）
+index: 3084,  speaker:青山龍星（しっとり）
+index: 3085,  speaker:青山龍星（かなしみ）
 index: 6000,  speaker:波音リツ（ノーマル）
 
 f:\sandbox>
 ```
 春日部つむぎにドレミファソラシドを歌ってもらいましょう。
 ```
-f:\sandbox>voxsay2 -prod voicevox -renderingmode sing -index 3008 -t O4CDEFGABO5C
+f:\sandbox>voxsay2 -prod voicevox -renderingmode sing -index 3008 -teacherindex 6000 -t O4CDEFGABO5C
 
 f:\sandbox>
 ```
@@ -153,7 +190,8 @@ voxsay2.exeと同じフォルダに作成したJSONファイル voxsay2conf.json
     "postphonemelength": 0.50,
     "samplingrate": 24000,
     "index": null,
-    "renderingmode": "talk",
+    "renderingmode": "sing",
+    "teacherindex": 6000, 
     "mf": null,
     "sf": null
   },
@@ -173,7 +211,7 @@ voxsay2.exeと同じフォルダに作成したJSONファイル voxsay2conf.json
 ```
 この例だと、オプションを指定して上書きしない限り、voxsay2 は
 ```
--prod voicevox -prephonemelength 0.50 -postphonemelength 0.50 -samplingrate 24000 -renderingmode talk
+-prod voicevox -prephonemelength 0.50 -postphonemelength 0.50 -samplingrate 24000 -renderingmode sing -teacherindex 6000
 ```
 が指定されたものとして動作します。
 

@@ -68,6 +68,17 @@ namespace voxsay2
                 return 0;
             }
 
+            // SingTeacher一覧表示
+            if (opt.IsRequestSingTeacherList)
+            {
+                foreach (var item in api.AvailableSingTeachers())
+                {
+                    Console.WriteLine(string.Format(@"index: {0},  speaker:{1}", item.Key, item.Value));
+                }
+
+                return 0;
+            }
+
             // 発声もしくは保存処理
             if (opt.Index != null)
             {
@@ -228,11 +239,11 @@ namespace voxsay2
 
                 if (opt.SaveFile != null)
                 {
-                    if (!api.SaveSong((int)opt.Index, pm, notes, GenFilename(opt.SaveFile))) rcd = 8;
+                    if (!api.SaveSong((int)opt.Index, (int)opt.TeacherIndex, pm, notes, GenFilename(opt.SaveFile))) rcd = 8;
                 }
                 else
                 {
-                    if (!api.Sing((int)opt.Index, pm, notes)) rcd = 8;
+                    if (!api.Sing((int)opt.Index, (int)opt.TeacherIndex, pm, notes)) rcd = 8;
                 }
             }
             else
@@ -249,11 +260,11 @@ namespace voxsay2
 
                         if (opt.SaveFile != null)
                         {
-                            if (!api.SaveSong((int)opt.Index, pm, notes, GenFilename(opt.SaveFile))) rcd = 8;
+                            if (!api.SaveSong((int)opt.Index, (int)opt.TeacherIndex, pm, notes, GenFilename(opt.SaveFile))) rcd = 8;
                         }
                         else
                         {
-                            if (!api.Sing((int)opt.Index, pm, notes)) rcd = 8;
+                            if (!api.Sing((int)opt.Index, (int)opt.TeacherIndex, pm, notes)) rcd = 8;
                         }
 
                         break;
@@ -270,11 +281,11 @@ namespace voxsay2
 
                                 if (opt.SaveFile != null)
                                 {
-                                    if (!api.SaveSong((int)opt.Index, pm, note, GenFilename(opt.SaveFile, fileTailNumber))) rcd = 8;
+                                    if (!api.SaveSong((int)opt.Index, (int)opt.TeacherIndex, pm, note, GenFilename(opt.SaveFile, fileTailNumber))) rcd = 8;
                                 }
                                 else
                                 {
-                                    if (!api.Sing((int)opt.Index, pm, note)) rcd = 8;
+                                    if (!api.Sing((int)opt.Index, (int)opt.TeacherIndex, pm, note)) rcd = 8;
                                 }
                             }
 

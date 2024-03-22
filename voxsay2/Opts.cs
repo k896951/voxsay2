@@ -12,6 +12,7 @@ namespace voxsay2
         public bool IsSafe { get; private set; } = false;
         public bool IsRequestSpeakerList { get; private set; } = false;
         public bool IsRequestActiveProductList { get; private set; } = false;
+        public bool IsRequestSingTeacherList { get; private set; } = false;
         public bool ExportNote { get; private set; } = false;
         public bool PrintNote { get; private set; } = false;
 
@@ -28,6 +29,7 @@ namespace voxsay2
         public int? OutputSamplingRate { get; set; }
         public int? Index { get; private set; }
         public string? RenderingMode { get; private set; } = "talk";
+        public int? TeacherIndex { get; private set; } = 6000;
 
         public string? TalkText { get; private set; }
         public string? SaveFile { get; private set; }
@@ -39,7 +41,7 @@ namespace voxsay2
         public SoundSettings SoundSetting { get; private set; }
 
         private string ConfFileNamee = @".\voxsay2conf.json";
-        private string VersionStr = "2.0.0";
+        private string VersionStr = "2.0.1";
 
         public Opts(string[] args)
         {
@@ -128,6 +130,11 @@ namespace voxsay2
                         i = args.Length;
                         break;
 
+                    case "-teacherlist":
+                        IsRequestSingTeacherList = true;
+                        i = args.Length;
+                        break;
+
                     case "-save":
                         if (i + 1 >= args.Length)
                         {
@@ -187,6 +194,30 @@ namespace voxsay2
                         }
                         RenderingMode = args[i + 1];  // "sing" or "talk" 
                         i++;
+                        break;
+
+                    case "-teacherindex":
+                    case "-ti":
+                        if (i + 1 < args.Length)
+                        {
+                            int result;
+                            Index = null;
+                            if (int.TryParse(args[i + 1], out result))
+                            {
+                                TeacherIndex = result;
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"Error: Invalid teacherindex specification.");
+                                IsSafe = false;
+                            }
+                            i++;
+                        }
+                        else
+                        {
+                            Console.WriteLine(@"Error: Incorrect teacherindex specification.");
+                            IsSafe = false;
+                        }
                         break;
 
                     case "-exportnote":
@@ -465,6 +496,7 @@ namespace voxsay2
                     OutputSamplingRate = json.DefaultSetting.OutputSamplingRate;
                     Index = json.DefaultSetting.Index;
                     RenderingMode = json.DefaultSetting.RenderingMode;
+                    TeacherIndex = json.DefaultSetting.TeacherIndex;
 
                     // -sf は -mf が定義されたら上書きされる
                     if (json.DefaultSetting.InputfilenameS != "")
@@ -490,7 +522,7 @@ namespace voxsay2
         {
             Console.WriteLine(
                 @"
-voxsay command {0} (c)2022,2023,2024 by k896951
+voxsay command {0} (c)2024 by k896951
 
 talk command line exsamples:
     voxsay -prodlist
@@ -500,8 +532,9 @@ talk command line exsamples:
 
 sing command line exsamples (VOICEVOX ONLY):
     voxsay -prod voicevox -renderingmode sing [Options1] -list
-    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] -t  TALKTEXT
-    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] [ -mf | -sf ] TEXTFILE
+    voxsay -prod voicevox -renderingmode sing [Options1] -teacherlist
+    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [-teacherindex N] [Options2] -t  TALKTEXT
+    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [-teacherindex N] [Options2] [ -mf | -sf ] TEXTFILE
 
 Note:
     * The ""-renderingmode sing"" option is only for VOICEVOX.
@@ -582,17 +615,21 @@ sing mode help
 
 sing command line exsamples (VOICEVOX ONLY):
     voxsay -prod voicevox -renderingmode sing [Options1] -list
-    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] -t TALKTEXT
-    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [Options2] [ -mf | -sf ] TEXTFILE
+    voxsay -prod voicevox -renderingmode sing [Options1] -teacherlist
+    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [-teacherindex N] [Options2] -t TALKTEXT
+    voxsay -prod voicevox -renderingmode sing [Options1] [-save FILENAME] <-index N> [-teacherindex N] [Options2] [ -mf | -sf ] TEXTFILE
 
 Options:
     -renderingmode sing   : Select sing rendering mode.
     -list                 : List singers for a given product.
+    -teacherlist          : List song teachers for a given product.
     -save FILENAME        : Save audio with specified file name.
                             Example: -save Hellow  -> Output audio to file ""Hellow.wav"".
                             Note: No audio playback with this option.
     -index N              : specify the singer index.
                             Example: -index 3003 -> use singer index number 3003.
+    -teacherindex N       : specify the song teacher index.
+                            Example: -teacherindex 6000 -> use song teacher index number 6000.
     -t MMLtext            : MMLtext to output in VOICEVOX.
                             Example : -t CDEF -> sing ""Do Re Mi Fa""
     -mf MMLTEXTFILE       : Output the contents of MMLTEXTFILE in VOICEVOX.

@@ -46,6 +46,9 @@ namespace voxsay2
         [DataMember(Name = "renderingmode")]
         public string RenderingMode { get;  set; }
 
+        [DataMember(Name = "teacherindex")]
+        public int? TeacherIndex { get; set; }
+
         [DataMember(Name = "mf")]
         public string? InputfilenameM { get;  set; }
 

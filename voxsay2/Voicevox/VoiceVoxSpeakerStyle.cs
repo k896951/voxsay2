@@ -15,5 +15,8 @@ namespace voxsay2
 
         [DataMember(Name = "id")]
         public int Id { get; set; }
+
+        [DataMember(Name = "type")]
+        public string SingType { get; set; }
     }
 }

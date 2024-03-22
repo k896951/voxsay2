@@ -221,6 +221,22 @@ namespace voxsay2
         }
 
         /// <summary>
+        /// 利用可能な歌唱指導歌手の取り出し
+        /// </summary>
+        /// <returns>歌手番号と名称の組み合わせのリスト</returns>
+        public List<KeyValuePair<int, string>> AvailableSingTeachers()
+        {
+            switch (SelectedProdinfo.Product)
+            {
+                case ProdnameEnum.voicevox:
+                    return VoiceVoxAvailableSingTeachers();
+
+                default:
+                    return new List<KeyValuePair<int, string>>();
+            }
+        }
+
+        /// <summary>
         /// 音声保存
         /// </summary>
         /// <param name="speaker">話者番号（StyleId）</param>
@@ -359,15 +375,16 @@ namespace voxsay2
         /// <summary>
         /// 歌唱
         /// </summary>
-        /// <param name="speaker">話者番号（StyleId）</param>
+        /// <param name="speaker">歌手番号（StyleId）</param>
+        /// <param name="teacher">歌唱指導歌手番号（StyleId）</param>
         /// <param name="param">エフェクト</param>
         /// <param name="mynotes">歌唱させる楽譜</param>
-        public bool Sing(int speaker, SpeakerParams param, VoiceVoxNotes mynotes)
+        public bool Sing(int speaker, int teacher, SpeakerParams param, VoiceVoxNotes mynotes)
         {
             switch (SelectedProdinfo.Product)
             {
                 case ProdnameEnum.voicevox:
-                    var voicevoxFrameQuery = GetVoiceVoxFrameAudioQuery(mynotes, 6000); // 現時点では6000固定
+                    var voicevoxFrameQuery = GetVoiceVoxFrameAudioQuery(mynotes, teacher);
 
                     if ((voicevoxFrameQuery != null) && (param != null))
                     {
@@ -385,15 +402,16 @@ namespace voxsay2
         /// <summary>
         /// 非同期歌唱
         /// </summary>
-        /// <param name="speaker">話者番号（StyleId）</param>
+        /// <param name="speaker">歌手番号（StyleId）</param>
+        /// <param name="teacher">歌唱指導歌手番号（StyleId）</param>
         /// <param name="param">エフェクト</param>
         /// <param name="mynotes">歌唱させる楽譜</param>
-        public void AsyncSing(int speaker, SpeakerParams param, VoiceVoxNotes mynotes)
+        public void AsyncSing(int speaker, int teacher, SpeakerParams param, VoiceVoxNotes mynotes)
         {
             switch (SelectedProdinfo.Product)
             {
                 case ProdnameEnum.voicevox:
-                    var voicevoxFrameQuery = GetVoiceVoxFrameAudioQuery(mynotes, 6000); // 現時点では6000固定
+                    var voicevoxFrameQuery = GetVoiceVoxFrameAudioQuery(mynotes, teacher);
 
                     if ((voicevoxFrameQuery != null) && (param != null))
                     {
@@ -413,16 +431,17 @@ namespace voxsay2
         /// <summary>
         /// 歌唱保存
         /// </summary>
-        /// <param name="speaker">話者番号（StyleId）</param>
+        /// <param name="speaker">歌手番号（StyleId）</param>
+        /// <param name="teacher">歌唱指導歌手番号（StyleId）</param>
         /// <param name="param">エフェクト</param>
         /// <param name="mynotes">歌唱させる楽譜</param>
         /// <param name="WavFilePath">保存するファイル名</param>
-        public bool SaveSong(int speaker, SpeakerParams param, VoiceVoxNotes mynotes, string WavFilePath)
+        public bool SaveSong(int speaker, int teacher,SpeakerParams param, VoiceVoxNotes mynotes, string WavFilePath)
         {
             switch (SelectedProdinfo.Product)
             {
                 case ProdnameEnum.voicevox:
-                    var voicevoxFrameQuery = GetVoiceVoxFrameAudioQuery(mynotes, 6000);// 現時点では6000固定
+                    var voicevoxFrameQuery = GetVoiceVoxFrameAudioQuery(mynotes, teacher);
 
                     if ((voicevoxFrameQuery != null) && (param != null))
                     {
@@ -846,6 +865,40 @@ namespace voxsay2
                 catch (Exception e)
                 {
                     Console.WriteLine("VoiceVoxAvailableCasts:{0}", e.Message);
+                    ans = null;
+                }
+            }).Wait();
+
+            return ans;
+        }
+        private List<KeyValuePair<int, string>> VoiceVoxAvailableSingTeachers()
+        {
+            DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
+            List<VoiceVoxSingers> speakers = new List<VoiceVoxSingers>();
+            var ans = new List<KeyValuePair<int, string>>();
+
+            Task.Run(async () => {
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.GetAsync(string.Format("{0}/singers", BaseUri));
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var json = new DataContractJsonSerializer(typeof(List<VoiceVoxSingers>), settings);
+
+                        speakers = (List<VoiceVoxSingers>)json.ReadObject(await response.Content.ReadAsStreamAsync());
+
+                        ans = speakers.SelectMany(v1 => v1.styles.Select(v2 => new { id = v2.Id, singtype=v2.SingType, speaker_uuid = v1.speaker_uuid, name = string.Format("{0}（{1}）", v1.name, v2.Name) }))
+                                      .Where(v => v.singtype == "sing" || v.singtype == "singing_teacher")
+                                      .OrderBy(v => v.id)
+                                      .Select(v => new KeyValuePair<int, string>(v.id, v.name)).ToList();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("VoiceVoxAvailableSingTeachers:{0}", e.Message);
                     ans = null;
                 }
             }).Wait();

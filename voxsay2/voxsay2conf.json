@@ -12,6 +12,7 @@
     "samplingrate": 24000,
     "index": null,
     "renderingmode": "talk",
+    "teacherindex": 6000, 
     "mf": null,
     "sf": null
   },
