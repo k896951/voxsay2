@@ -61,7 +61,7 @@ namespace voxsay2
             {
                 if(tonly)
                 {
-                    TalkText = TalkText + args[i];
+                    TalkText += args[i];
                     continue;
                 }
 

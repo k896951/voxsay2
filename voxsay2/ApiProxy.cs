@@ -41,7 +41,7 @@ namespace voxsay2
         {
             SelectedProdinfo = ProdList[(ProdnameEnum)Enum.Parse(typeof(ProdnameEnum), prodname)];
             PlayMethod = playMethod;
-            if (ConClient is null) ConClient = new HttpClient();
+            ConClient ??= new HttpClient();
             BaseUri = string.Format(@"http://{0}:{1}{2}", SelectedProdinfo.Hostname, SelectedProdinfo.Portnumber, SelectedProdinfo.Context);
         }
 
@@ -60,7 +60,7 @@ namespace voxsay2
             if (host != null) SelectedProdinfo.Hostname = host;
             if (port != null) SelectedProdinfo.Portnumber = (int)port;
 
-            if (ConClient is null) ConClient = new HttpClient();
+            ConClient ??= new HttpClient();
             BaseUri = string.Format(@"http://{0}:{1}{2}", SelectedProdinfo.Hostname, SelectedProdinfo.Portnumber, SelectedProdinfo.Context);
         }
 
@@ -89,7 +89,7 @@ namespace voxsay2
             bool ans = false;
             HttpResponseMessage response = null;
 
-            if (CheckClient is null) CheckClient = new HttpClient();
+            CheckClient ??= new HttpClient();
 
             Task.Run(async () => {
                 try
@@ -119,7 +119,7 @@ namespace voxsay2
             Task[] tasks = new Task[ProdList.Count];
             int taskarrayIndex = 0;
 
-            if (CheckClient is null) CheckClient = new HttpClient();
+            CheckClient ??= new HttpClient();
 
             foreach (var item in ProdList)
             {
@@ -890,7 +890,7 @@ namespace voxsay2
 
                         speakers = (List<VoiceVoxSingers>)json.ReadObject(await response.Content.ReadAsStreamAsync());
 
-                        ans = speakers.SelectMany(v1 => v1.styles.Select(v2 => new { id = v2.Id, singtype=v2.SingType, speaker_uuid = v1.speaker_uuid, name = string.Format("{0}（{1}）", v1.name, v2.Name) }))
+                        ans = speakers.SelectMany(v1 => v1.Styles.Select(v2 => new { id = v2.Id, singtype=v2.SingType, speaker_uuid = v1.Speaker_uuid, name = string.Format("{0}（{1}）", v1.Name, v2.Name) }))
                                       .Where(v => v.singtype == "sing" || v.singtype == "singing_teacher")
                                       .OrderBy(v => v.id)
                                       .Select(v => new KeyValuePair<int, string>(v.id, v.name)).ToList();
@@ -925,7 +925,7 @@ namespace voxsay2
 
                         speakers = (List<VoiceVoxSingers>)json.ReadObject(await response.Content.ReadAsStreamAsync());
 
-                        ans = speakers.SelectMany(v1 => v1.styles.Select(v2 => new { id = v2.Id, speaker_uuid = v1.speaker_uuid, name = string.Format("{0}（{1}）", v1.name, v2.Name) }))
+                        ans = speakers.SelectMany(v1 => v1.Styles.Select(v2 => new { id = v2.Id, speaker_uuid = v1.Speaker_uuid, name = string.Format("{0}（{1}）", v1.Name, v2.Name) }))
                                       .OrderBy(v => v.id)
                                       .Select(v => new KeyValuePair<int, string>(v.id, v.name)).ToList();
                     }

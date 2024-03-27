@@ -11,15 +11,15 @@ namespace voxsay2
     public class VoiceVoxSingers
     {
         [DataMember]
-        public string name { get; set; }
+        public string Name { get; set; }
 
         [DataMember]
-        public string speaker_uuid { get; set; }
+        public string Speaker_uuid { get; set; }
 
         [DataMember]
-        public VoiceVoxSpeakerStyle[] styles { get; set; }
+        public VoiceVoxSpeakerStyle[] Styles { get; set; }
 
         [DataMember]
-        public string version { get; set; }
+        public string Version { get; set; }
     }
 }
