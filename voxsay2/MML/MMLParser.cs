@@ -17,6 +17,7 @@ namespace voxsay2
         private const string MacroMatchReg2 = @"^([><]|S\d|[TON]\d{1,}|L\d{1,}\.{0,1}|R\d{0,}\.{0,1}|[CDEFGAB][#+\-]{0,1}\d{0,}\.{0,1})";
         private const string MacroNumMatchReg = @"\d{1,}";
         private const string MacroDotMatchReg = @"\.";
+        private const string MacroSpaceMatchReg = @"[ 　\t]";
         private const string MacroNoteLenMatchReg = @"\d{0,}\.{0,1}";
 
         private const int MinBPM = 40;
@@ -254,7 +255,14 @@ namespace voxsay2
             int addpos;
             for (var pos = 0; pos < localMML.Length; pos += addpos)
             {
-                // MMLマクロの書式に合致しないならエラー
+                // スキップ対象文字なら読み飛ばす
+                if (Regex.IsMatch(localMML.Substring(pos, 1), MacroSpaceMatchReg))
+                {
+                    addpos = 1;
+                    continue;
+                }
+
+                // MMLマクロに合致しないならエラー
                 if (!Regex.IsMatch(localMML.Substring(pos), MacroMatchReg0))
                 {
                     throw new Exception(string.Format(@"mml Part column {0}, '{1}' はサポートしていないマクロです", pos + 1, localMML.Substring(pos, 1)));
