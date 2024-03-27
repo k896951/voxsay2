@@ -19,7 +19,7 @@
 ```
 f:\sandbox>voxsay2
 
-voxsay command 2.0.0 (c)2024 by k896951
+voxsay command 2.0.1 (c)2024 by k896951
 
 talk command line exsamples:
     voxsay -prodlist
@@ -143,14 +143,36 @@ index: 3017,  speaker:九州そら（セクシー）
 index: 3018,  speaker:九州そら（ツンツン）
 index: 3020,  speaker:もち子さん（ノーマル）
 index: 3021,  speaker:剣崎雌雄（ノーマル）
+index: 3023,  speaker:WhiteCUL（ノーマル）
+index: 3024,  speaker:WhiteCUL（たのしい）
+index: 3025,  speaker:WhiteCUL（かなしい）
+index: 3026,  speaker:WhiteCUL（びえーん）
+index: 3027,  speaker:後鬼（人間ver.）
+index: 3028,  speaker:後鬼（ぬいぐるみver.）
+index: 3029,  speaker:No.7（ノーマル）
+index: 3030,  speaker:No.7（アナウンス）
+index: 3031,  speaker:No.7（読み聞かせ）
 index: 3032,  speaker:白上虎太郎（わーい）
 index: 3033,  speaker:白上虎太郎（びくびく）
 index: 3034,  speaker:白上虎太郎（おこ）
 index: 3035,  speaker:白上虎太郎（びえーん）
+index: 3037,  speaker:四国めたん（ヒソヒソ）
+index: 3038,  speaker:ずんだもん（ヒソヒソ）
 index: 3039,  speaker:玄野武宏（喜び）
 index: 3040,  speaker:玄野武宏（ツンギレ）
 index: 3041,  speaker:玄野武宏（悲しみ）
+index: 3042,  speaker:ちび式じい（ノーマル）
+index: 3043,  speaker:櫻歌ミコ（ノーマル）
+index: 3044,  speaker:櫻歌ミコ（第二形態）
+index: 3045,  speaker:櫻歌ミコ（ロリ）
+index: 3046,  speaker:小夜/SAYO（ノーマル）
+index: 3047,  speaker:ナースロボ＿タイプＴ（ノーマル）
+index: 3048,  speaker:ナースロボ＿タイプＴ（楽々）
+index: 3049,  speaker:ナースロボ＿タイプＴ（恐怖）
+index: 3065,  speaker:波音リツ（クイーン）
 index: 3066,  speaker:もち子さん（セクシー／あん子）
+index: 3075,  speaker:ずんだもん（ヘロヘロ）
+index: 3076,  speaker:ずんだもん（なみだめ）
 index: 3077,  speaker:もち子さん（泣き）
 index: 3078,  speaker:もち子さん（怒り）
 index: 3079,  speaker:もち子さん（喜び）
