@@ -13,6 +13,7 @@ namespace voxsay2
         public bool IsRequestSpeakerList { get; private set; } = false;
         public bool IsRequestActiveProductList { get; private set; } = false;
         public bool IsRequestSingTeacherList { get; private set; } = false;
+        public bool IsRequestMorphtargetList { get; private set; } = false;
         public bool ExportNote { get; private set; } = false;
         public bool PrintNote { get; private set; } = false;
 
@@ -30,6 +31,8 @@ namespace voxsay2
         public int? Index { get; private set; }
         public string? RenderingMode { get; private set; } = "talk";
         public int? TeacherIndex { get; private set; } = 6000;
+        public int? MorphTargetIndex { get; private set; }
+        public double? MorphRate { get; private set; }
 
         public string? TalkText { get; private set; }
         public string? SaveFile { get; private set; }
@@ -132,6 +135,11 @@ namespace voxsay2
 
                     case "-teacherlist":
                         IsRequestSingTeacherList = true;
+                        i = args.Length;
+                        break;
+
+                    case "-morphtargetlist":
+                        IsRequestMorphtargetList = true;
                         i = args.Length;
                         break;
 
@@ -265,6 +273,43 @@ namespace voxsay2
                             else
                             {
                                 Console.WriteLine(@"Error: Invalid index specification.");
+                                IsSafe = false;
+                            }
+                            i++;
+                        }
+                        else
+                        {
+                            Console.WriteLine(@"Error: Incorrect index specification.");
+                            IsSafe = false;
+                        }
+                        break;
+
+                    case "-morphtargetindex":
+                    case "-mti":
+                        if (i + 2 < args.Length)
+                        {
+                            int result1;
+                            double result2;
+
+                            MorphTargetIndex = null;
+                            if (int.TryParse(args[i + 1], out result1))
+                            {
+                                MorphTargetIndex = result1;
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"Error: Invalid morph target index specification.");
+                                IsSafe = false;
+                            }
+
+                            MorphRate = 1.0;
+                            if (double.TryParse(args[i + 2], out result2))
+                            {
+                                MorphRate = result2;
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"Error: Invalid morph rate specification.");
                                 IsSafe = false;
                             }
                             i++;
@@ -570,11 +615,15 @@ Options:
     -renderingmode talk   : Select talk rendering mode. *default is ""talk"".
     -prod TTS             : Select tts product. TTS := <sapi | voicevox | voicevoxnemo | coeiroink | coeiroinkv2 | lmroid | sharevox | itvoice>
     -list                 : List speakers for a given product.
+    -morphtargetlist      : List morph target speakers for a given speaker index.
+                            Example: -index 4 -morphtargetlist -> List available morph target speakers for speaker with index number 4.
     -save FILENAME        : Save audio with specified file name.
                             Example: -save Hellow  -> Output audio to file ""Hellow.wav"".
                             Note: No audio playback with this option.
     -index N              : specify the speaker index.
                             Example: -index 4 -> use speaker index number 4.
+    -morphtargetindex N R : specify the morph target speaker index N and morphing rate R.
+                            Example: -morphtargetindex 8 0.7 -> use morph target speaker index number 8, morphing rate 70%.
     -t TalkText           : TalkText to output in tts.
                             Example : -t Hellow world! -> say ""Hello world!""
     -mf TEXTFILE          : Output the contents of TEXTFILE in tts.
