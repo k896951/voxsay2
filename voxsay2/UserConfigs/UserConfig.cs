@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace voxsay2
+namespace voxsay2.UserConfigs
 {
     [DataContract]
     public class UserConfig

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace voxsay2
+namespace voxsay2.UserConfigs
 {
     [DataContract]
     public class SoundSettings

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
+using voxsay2.common;
+using voxsay2.UserConfigs;
 
 
 namespace voxsay2
@@ -18,26 +20,28 @@ namespace voxsay2
         public bool PrintNote { get; private set; } = false;
 
         public string? SpecifiedProduct { get; private set; } = "voicevox";
-        public string? SpecifiedHost { get; private set; }
-        public int? SpecifiedPort { get; private set; }
+        public string? SpecifiedHost { get; private set; } = "127.0.0.1";
+        public int? SpecifiedPort { get; private set; } = 50021;
 
-        public double? SpeedScale { get; private set; }
-        public double? PitchScale { get; private set; }
-        public double? IntonationScale { get; private set; }
-        public double? VolumeScale { get; private set; }
-        public double? PrePhonemeLength { get; private set; }
-        public double? PostPhonemeLength { get; private set; }
-        public int? OutputSamplingRate { get; set; }
-        public int? Index { get; private set; }
+        public double? SpeedScale { get; private set; } = 1.0;
+        public double? PitchScale { get; private set; } = 0.0;
+        public double? IntonationScale { get; private set; } = 1.0;
+        public double? VolumeScale { get; private set; } = 1.0;
+        public double? PrePhonemeLength { get; private set; } = 0.1;
+        public double? PostPhonemeLength { get; private set; } = 0.1;
+        public int? OutputSamplingRate { get; set; } =44100;
+        public int? Index { get; private set; } = 0;
         public string? RenderingMode { get; private set; } = "talk";
         public int? TeacherIndex { get; private set; } = 6000;
         public int? MorphTargetIndex { get; private set; }
         public double? MorphRate { get; private set; }
+        public double? TempoDynamicsScale{ get; private set; }
+        public double? PauselengthScale { get; private set; }
 
-        public string? TalkText { get; private set; }
-        public string? SaveFile { get; private set; }
+        public string? TalkText { get; private set; } = "";
+        public string? SaveFile { get; private set; } = "";
 
-        public string? Inputfilename { get; private set; }
+        public string? Inputfilename { get; private set; } = "";
         public SingWavGenTypeEnum SingWaveGenType { get; private set; } = SingWavGenTypeEnum.allnote;
         public TalkWavGenTypeEnum TalkWaveGenType { get; private set; } = TalkWavGenTypeEnum.allline;
 
@@ -465,6 +469,54 @@ namespace voxsay2
                         }
                         break;
 
+                    case "-tempodynamics":
+                        if (i + 1 < args.Length)
+                        {
+                            double result;
+                            TempoDynamicsScale = null;
+                            if (double.TryParse(args[i + 1], out result))
+                            {
+                                TempoDynamicsScale = result;
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"Error: Invalid tempodynamics specification.");
+                                IsSafe = false;
+                            }
+                            i++;
+                        }
+                        else
+                        {
+                            Console.WriteLine(@"Error: Incorrect tempodynamics specification.");
+                            IsSafe = false;
+                        }
+                        break;
+
+                    case "-pauselength":
+                        if (i + 1 < args.Length)
+                        {
+                            double result;
+                            PauselengthScale = null;
+                            if (double.TryParse(args[i + 1], out result))
+                            {
+                                PauselengthScale = result;
+                            }
+                            else
+                            {
+                                Console.WriteLine(@"Error: Invalid pauselength specification.");
+                                IsSafe = false;
+                            }
+                            i++;
+                        }
+                        else
+                        {
+                            Console.WriteLine(@"Error: Incorrect pauselength specification.");
+                            IsSafe = false;
+                        }
+                        break;
+
+
+
                     case "-help":
                         if (i + 1 >= args.Length)
                         {
@@ -514,7 +566,7 @@ namespace voxsay2
                 {
                     using (var fs = new FileStream(ConfFileNamee, FileMode.Open))
                     {
-                        json = (UserConfig)js.ReadObject(fs);
+                        json = js.ReadObject(fs) as UserConfig;
                         fs.Close();
                     }
                 }
@@ -527,39 +579,40 @@ namespace voxsay2
                     Console.WriteLine(ex.Message);
                 }
 
-                if (json != null)
+                if (json is null)  return;
+
+                SpecifiedProduct = json?.DefaultSetting.SpecifiedProduct;
+                SpecifiedHost = json?.DefaultSetting.SpecifiedHost;
+                SpecifiedPort = json?.DefaultSetting.SpecifiedPort;
+                SpeedScale = json?.DefaultSetting.SpeedScale;
+                PitchScale = json?.DefaultSetting.PitchScale;
+                IntonationScale = json?.DefaultSetting.IntonationScale;
+                VolumeScale = json?.DefaultSetting.VolumeScale;
+                PrePhonemeLength = json?.DefaultSetting.PrePhonemeLength;
+                PostPhonemeLength = json?.DefaultSetting.PostPhonemeLength;
+                OutputSamplingRate = json?.DefaultSetting.OutputSamplingRate;
+                Index = json?.DefaultSetting.Index;
+                RenderingMode = json?.DefaultSetting.RenderingMode;
+                TeacherIndex = json?.DefaultSetting.TeacherIndex;
+                TempoDynamicsScale = json?.DefaultSetting.TempoDynamicsScale;
+                PauselengthScale = json?.DefaultSetting.PauseLengthScale;
+
+                // -sf は -mf が定義されたら上書きされる
+                if (json?.DefaultSetting.InputfilenameS != "")
                 {
-                    SpecifiedProduct = json.DefaultSetting.SpecifiedProduct;
-                    SpecifiedHost = json.DefaultSetting.SpecifiedHost;
-                    SpecifiedPort = json.DefaultSetting.SpecifiedPort;
-                    SpeedScale = json.DefaultSetting.SpeedScale;
-                    PitchScale = json.DefaultSetting.PitchScale;
-                    IntonationScale = json.DefaultSetting.IntonationScale;
-                    VolumeScale = json.DefaultSetting.VolumeScale;
-                    PrePhonemeLength = json.DefaultSetting.PrePhonemeLength;
-                    PostPhonemeLength = json.DefaultSetting.PostPhonemeLength;
-                    OutputSamplingRate = json.DefaultSetting.OutputSamplingRate;
-                    Index = json.DefaultSetting.Index;
-                    RenderingMode = json.DefaultSetting.RenderingMode;
-                    TeacherIndex = json.DefaultSetting.TeacherIndex;
-
-                    // -sf は -mf が定義されたら上書きされる
-                    if (json.DefaultSetting.InputfilenameS != "")
-                    {
-                        Inputfilename = json.DefaultSetting.InputfilenameS;
-                        SingWaveGenType = SingWavGenTypeEnum.splitnote;
-                        TalkWaveGenType = TalkWavGenTypeEnum.splitline;
-                    }
-                    // -mf が優先される
-                    if (json.DefaultSetting.InputfilenameM != "")
-                    {
-                        Inputfilename = json.DefaultSetting.InputfilenameM;
-                        SingWaveGenType = SingWavGenTypeEnum.allnote;
-                        TalkWaveGenType = TalkWavGenTypeEnum.allline;
-                    }
-
-                    SoundSetting = json.SoundSetting;
+                    Inputfilename = json?.DefaultSetting.InputfilenameS;
+                    SingWaveGenType = SingWavGenTypeEnum.splitnote;
+                    TalkWaveGenType = TalkWavGenTypeEnum.splitline;
                 }
+                // -mf が優先される
+                if (json?.DefaultSetting.InputfilenameM != "")
+                {
+                    Inputfilename = json?.DefaultSetting.InputfilenameM;
+                    SingWaveGenType = SingWavGenTypeEnum.allnote;
+                    TalkWaveGenType = TalkWavGenTypeEnum.allline;
+                }
+
+                SoundSetting = json?.SoundSetting;
             }
         }
 
@@ -613,7 +666,7 @@ talk command line exsamples:
 Options:
     -prodlist             : List available local TTS products.
     -renderingmode talk   : Select talk rendering mode. *default is ""talk"".
-    -prod TTS             : Select tts product. TTS := <sapi | voicevox | voicevoxnemo | coeiroink | coeiroinkv2 | lmroid | sharevox | itvoice>
+    -prod TTS             : Select tts product. TTS := <sapi | voicevox | voicevoxnemo | coeiroink | coeiroinkv2 | lmroid | sharevox | itvoice | aivisspeech>
     -list                 : List speakers for a given product.
     -morphtargetlist      : List morph target speakers for a given speaker index.
                             Example: -index 4 -morphtargetlist -> List available morph target speakers for speaker with index number 4.
@@ -647,6 +700,9 @@ Options2:
                                                            Default: 0    Range: -10   .. 10   Step: 1.00 * sapi
     -prephonemelength P   : specify the prephonemelength.  Default: 0.1  Range:  0    .. 1.5  Step: 0.01
     -postphonemelength P  : specify the postphonemelength. Default: 0.1  Range:  0    .. 1.5  Step: 0.01
+
+    -tempodynamics P      : specify the tempodynamics.     Default: 1.0  Range:  0    .. 2.0  Step: 0.01 *aivisspeech
+    -pauselength P        : specify the pauselength.       Default: 1.0  Range:  0    .. 2.0  Step: 0.01 *aivisspeech
 
 Note:
     - Anything specified after -t is treated as tts text.

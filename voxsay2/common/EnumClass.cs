@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace voxsay2
+namespace voxsay2.common
 {
     public enum ProdnameEnum
     {
@@ -14,7 +14,8 @@ namespace voxsay2
         lmroid,
         sharevox,
         itvoice,
-        voicevoxnemo
+        voicevoxnemo,
+        aivisspeech
     }
 
     public enum SingWavGenTypeEnum

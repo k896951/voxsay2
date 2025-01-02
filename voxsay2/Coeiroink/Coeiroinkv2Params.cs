@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using voxsay2.common;
 
-namespace voxsay2
+namespace voxsay2.Coeiroink
 {
     public class Coeiroinkv2Params : SpeakerParams
     {

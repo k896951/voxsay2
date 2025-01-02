@@ -5,6 +5,11 @@ using System.Media;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using voxsay2.AivisSpeech;
+using voxsay2.Coeiroink;
+using voxsay2.common;
+using voxsay2.UserConfigs;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace voxsay2
 {
@@ -24,7 +29,8 @@ namespace voxsay2
             { ProdnameEnum.coeiroinkv2, new ProductInfo("127.0.0.1", 50032, "/v1", ProdnameEnum.coeiroinkv2) },
             { ProdnameEnum.lmroid, new ProductInfo("127.0.0.1", 50073, "", ProdnameEnum.lmroid) },
             { ProdnameEnum.sharevox, new ProductInfo("127.0.0.1", 50025, "", ProdnameEnum.sharevox) },
-            { ProdnameEnum.itvoice, new ProductInfo("127.0.0.1", 49540, "", ProdnameEnum.itvoice) }
+            { ProdnameEnum.itvoice, new ProductInfo("127.0.0.1", 49540, "", ProdnameEnum.itvoice) },
+            { ProdnameEnum.aivisspeech, new ProductInfo("127.0.0.1", 10101, "", ProdnameEnum.aivisspeech) }
         };
 
         /// <summary>
@@ -77,7 +83,7 @@ namespace voxsay2
         /// <returns>扱えるならTrue</returns>
         public static bool IsValidProduct(string prodname)
         {
-            return Enum.TryParse(prodname, out ProdnameEnum prod) && Enum.IsDefined(typeof(ProdnameEnum), prod);
+            return prodname is null ? false : Enum.TryParse(prodname, out ProdnameEnum prod) && Enum.IsDefined(typeof(ProdnameEnum), prod);
         }
 
         /// <summary>
@@ -112,7 +118,7 @@ namespace voxsay2
         /// 利用可能製品一覧取得
         /// </summary>
         /// <returns>利用可能製品一覧</returns>
-        public static List<ProdnameEnum> ConnectivityList()
+        public static List<ProdnameEnum> GetConnectivityList()
         {
             List<ProdnameEnum> ans = new List<ProdnameEnum>();
             HttpResponseMessage response = null;
@@ -137,7 +143,7 @@ namespace voxsay2
                     }
                     catch (Exception)
                     {
-                        //
+                        //Console.WriteLine(@"{0}:{1}", item.ToString(), e.Message);
                     }
                 });
                 taskarrayIndex++;
@@ -151,37 +157,56 @@ namespace voxsay2
         /// <summary>
         /// 話者パラメタの取り出し
         /// </summary>
-        /// <param name="speaker">話者番号（StyleId）</param>
         /// <returns>パラメタ情報</returns>
-        public SpeakerParams GetAvatorParams(int speaker)
+        public SpeakerParams GetAvatorParams()
         {
             SpeakerParams ans;
             switch (SelectedProdinfo.Product)
             {
                 // 各種パラメタ値の取得が出来そうなAPIが見つけられなかったので、GUIに設定されていた設定値デフォルトとして適用する
                 case ProdnameEnum.coeiroinkv2:
-                    ans = new Coeiroinkv2Params();
+                    var coe = new Coeiroinkv2Params
+                    {
+                        intonationScale = 1.0,     // Range:  0    .. 2
+                        pitchScale = 0.0,          // Range: -0.15 .. 0.15
+                        speedScale = 1.0,          // Range:  0.5  .. 2
+                        volumeScale = 1.0,         // Range:  0    .. 2
+                        prePhonemeLength = 0.1,    // Range:  0    .. 1.5
+                        postPhonemeLength = 0.1,   // Range:  0    .. 1.5
+                        outputSamplingRate = 44100
+                    };
+                    ans = coe;
+                    break;
 
-                    ans.intonationScale = 1.0;     // Range:  0    .. 2
-                    ans.pitchScale = 0.0;          // Range: -0.15 .. 0.15
-                    ans.speedScale = 1.0;          // Range:  0.5  .. 2
-                    ans.volumeScale = 1.0;         // Range:  0    .. 2
-                    ans.prePhonemeLength = 0.1;    // Range:  0    .. 1.5
-                    ans.postPhonemeLength = 0.1;   // Range:  0    .. 1.5
-                    ans.outputSamplingRate = 44100;
+                // 各種パラメタ値の取得が出来そうなAPIが見つけられなかったので、GUIに設定されていた設定値デフォルトとして適用する
+                case ProdnameEnum.aivisspeech:
+                    var aivis = new AivisSpeechParams
+                    {
+                        intonationScale = 1.0,     // Range:  0    .. 2
+                        pitchScale = 0.0,          // Range: -0.15 .. 0.15
+                        speedScale = 1.0,          // Range:  0.5  .. 2
+                        volumeScale = 1.0,         // Range:  0    .. 2
+                        prePhonemeLength = 0.1,    // Range:  0    .. 1.5
+                        postPhonemeLength = 0.1,   // Range:  0    .. 1.5
+                        tempodynamicsScale = 1.0,  // Range:  0    .. 2
+                        pauselengthScale = 1.0,    // Range:  0    .. 2
+                        outputSamplingRate = 44100
+                    };
+                    ans = aivis;
                     break;
 
                 // 面倒なのでVOICEVOXのデフォルト値を適用する。
                 default:
-                    ans = new VoiceVoxParams();
-
-                    ans.intonationScale = 1.0;     // Range:  0    .. 2
-                    ans.pitchScale = 0.0;          // Range: -0.15 .. 0.15
-                    ans.speedScale = 1.0;          // Range:  0.5  .. 2
-                    ans.volumeScale = 1.0;         // Range:  0    .. 2
-                    ans.prePhonemeLength = 0.1;    // Range:  0    .. 1.5
-                    ans.postPhonemeLength = 0.1;   // Range:  0    .. 1.5
-                    ans.outputSamplingRate = 44100;
+                    ans = new VoiceVoxParams
+                    {
+                        intonationScale = 1.0,     // Range:  0    .. 2
+                        pitchScale = 0.0,          // Range: -0.15 .. 0.15
+                        speedScale = 1.0,          // Range:  0.5  .. 2
+                        volumeScale = 1.0,         // Range:  0    .. 2
+                        prePhonemeLength = 0.1,    // Range:  0    .. 1.5
+                        postPhonemeLength = 0.1,   // Range:  0    .. 1.5
+                        outputSamplingRate = 44100
+                    };
                     break;
             }
 
@@ -192,15 +217,18 @@ namespace voxsay2
         /// 利用可能な話者の取り出し
         /// </summary>
         /// <returns>話者番号と名称の組み合わせのリスト</returns>
-        public List<KeyValuePair<int, string>> AvailableCasts()
+        public List<KeyValuePair<int, string>> GetAvailableCasts()
         {
             switch (SelectedProdinfo.Product)
             {
                 case ProdnameEnum.coeiroinkv2:
-                    return Coeiroinkv2AvailableCasts();
+                    return GetCoeiroinkv2AvailableCasts();
+
+                case ProdnameEnum.aivisspeech:
+                    return GetAivisSpeechAvailableCasts();
 
                 default:
-                    return VoiceVoxAvailableCasts();
+                    return GetVoiceVoxAvailableCasts();
             }
         }
 
@@ -208,7 +236,7 @@ namespace voxsay2
         /// 利用可能な歌手の取り出し
         /// </summary>
         /// <returns>歌手番号と名称の組み合わせのリスト</returns>
-        public List<KeyValuePair<int, string>> AvailableSingers()
+        public List<KeyValuePair<int, string>> GetAvailableSingers()
         {
             switch (SelectedProdinfo.Product)
             {
@@ -224,7 +252,7 @@ namespace voxsay2
         /// 利用可能な歌唱指導歌手の取り出し
         /// </summary>
         /// <returns>歌手番号と名称の組み合わせのリスト</returns>
-        public List<KeyValuePair<int, string>> AvailableSingTeachers()
+        public List<KeyValuePair<int, string>> GetAvailableSingTeachers()
         {
             switch (SelectedProdinfo.Product)
             {
@@ -248,36 +276,13 @@ namespace voxsay2
             switch (SelectedProdinfo.Product)
             {
                 case ProdnameEnum.coeiroinkv2:
-                    var coeiroinkv2aq = GetCoeiroinkv2AudioQuery(text, speaker);
+                    return PostCoeiroinkv2SynthesisQuery(GetAudioQuery(speaker, param, text) as Coeiroinkv2AudioQuery, speaker, WavFilePath);
 
-                    if ((coeiroinkv2aq != null) && (param != null))
-                    {
-                        coeiroinkv2aq.volumeScale = param.volumeScale;
-                        coeiroinkv2aq.intonationScale = param.intonationScale;
-                        coeiroinkv2aq.pitchScale = param.pitchScale;
-                        coeiroinkv2aq.speedScale = param.speedScale;
-                        coeiroinkv2aq.prePhonemeLength = param.prePhonemeLength;
-                        coeiroinkv2aq.postPhonemeLength = param.postPhonemeLength;
-                        coeiroinkv2aq.outputSamplingRate = param.outputSamplingRate;
-                    }
-
-                    return PostCoeiroinkv2SynthesisQuery(coeiroinkv2aq, speaker, WavFilePath);
+                case ProdnameEnum.aivisspeech:
+                    return PostAivisSpeechSynthesisQuery(GetAudioQuery(speaker, param, text) as AivisSpeechAudioQuery, speaker, WavFilePath);
 
                 default:
-                    var voicevoxaq = GetVoiceVoxAudioQuery(text, speaker);
-
-                    if ((voicevoxaq != null) && (param != null))
-                    {
-                        voicevoxaq.volumeScale = param.volumeScale;
-                        voicevoxaq.intonationScale = param.intonationScale;
-                        voicevoxaq.pitchScale = param.pitchScale;
-                        voicevoxaq.speedScale = param.speedScale;
-                        voicevoxaq.prePhonemeLength = param.prePhonemeLength;
-                        voicevoxaq.postPhonemeLength = param.postPhonemeLength;
-                        voicevoxaq.outputSamplingRate = param.outputSamplingRate;
-                    }
-
-                    return PostVoiceVoxSynthesisQuery(voicevoxaq, speaker, WavFilePath);
+                    return PostVoiceVoxSynthesisQuery(GetAudioQuery(speaker, param, text) as VoiceVoxAudioQuery, speaker, WavFilePath);
             }
         }
 
@@ -292,36 +297,13 @@ namespace voxsay2
             switch (SelectedProdinfo.Product)
             {
                 case ProdnameEnum.coeiroinkv2:
-                    var coeiroinkv2aq = GetCoeiroinkv2AudioQuery(text, speaker);
+                    return PostCoeiroinkv2SynthesisQuery(GetAudioQuery(speaker, param, text) as Coeiroinkv2AudioQuery, speaker, "");
 
-                    if ((coeiroinkv2aq != null) && (param != null))
-                    {
-                        coeiroinkv2aq.volumeScale = param.volumeScale;
-                        coeiroinkv2aq.intonationScale = param.intonationScale;
-                        coeiroinkv2aq.pitchScale = param.pitchScale;
-                        coeiroinkv2aq.speedScale = param.speedScale;
-                        coeiroinkv2aq.prePhonemeLength = param.prePhonemeLength;
-                        coeiroinkv2aq.postPhonemeLength = param.postPhonemeLength;
-                        coeiroinkv2aq.outputSamplingRate = param.outputSamplingRate;
-                    }
-
-                    return PostCoeiroinkv2SynthesisQuery(coeiroinkv2aq, speaker, "");
+                case ProdnameEnum.aivisspeech:
+                    return PostAivisSpeechSynthesisQuery(GetAudioQuery(speaker, param, text) as AivisSpeechAudioQuery, speaker, "");
 
                 default:
-                    var voicevoxaq = GetVoiceVoxAudioQuery(text, speaker);
-
-                    if ((voicevoxaq != null) && (param != null))
-                    {
-                        voicevoxaq.volumeScale = param.volumeScale;
-                        voicevoxaq.intonationScale = param.intonationScale;
-                        voicevoxaq.pitchScale = param.pitchScale;
-                        voicevoxaq.speedScale = param.speedScale;
-                        voicevoxaq.prePhonemeLength = param.prePhonemeLength;
-                        voicevoxaq.postPhonemeLength = param.postPhonemeLength;
-                        voicevoxaq.outputSamplingRate = param.outputSamplingRate;
-                    }
-
-                    return PostVoiceVoxSynthesisQuery(voicevoxaq, speaker, "");
+                    return PostVoiceVoxSynthesisQuery(GetAudioQuery(speaker, param, text) as VoiceVoxAudioQuery, speaker, "");
             }
         }
 
@@ -336,37 +318,15 @@ namespace voxsay2
             switch (SelectedProdinfo.Product)
             {
                 case ProdnameEnum.coeiroinkv2:
-                    var coeiroinkv2aq = GetCoeiroinkv2AudioQuery(text, speaker);
+                    AsyncPostCoeiroinkv2SynthesisQuery(GetAudioQuery(speaker, param, text) as Coeiroinkv2AudioQuery, speaker);
+                    break;
 
-                    if ((coeiroinkv2aq != null) && (param != null))
-                    {
-                        coeiroinkv2aq.volumeScale = param.volumeScale;
-                        coeiroinkv2aq.intonationScale = param.intonationScale;
-                        coeiroinkv2aq.pitchScale = param.pitchScale;
-                        coeiroinkv2aq.speedScale = param.speedScale;
-                        coeiroinkv2aq.prePhonemeLength = param.prePhonemeLength;
-                        coeiroinkv2aq.postPhonemeLength = param.postPhonemeLength;
-                        coeiroinkv2aq.outputSamplingRate = param.outputSamplingRate;
-                    }
-
-                    AsyncPostCoeiroinkv2SynthesisQuery(coeiroinkv2aq, speaker);
+                case ProdnameEnum.aivisspeech:
+                    AsyncPostAivisSpeechSynthesisQuery(GetAudioQuery(speaker, param, text) as AivisSpeechAudioQuery, speaker);
                     break;
 
                 default:
-                    var voicevoxaq = GetVoiceVoxAudioQuery(text, speaker);
-
-                    if ((voicevoxaq != null) && (param != null))
-                    {
-                        voicevoxaq.volumeScale = param.volumeScale;
-                        voicevoxaq.intonationScale = param.intonationScale;
-                        voicevoxaq.pitchScale = param.pitchScale;
-                        voicevoxaq.speedScale = param.speedScale;
-                        voicevoxaq.prePhonemeLength = param.prePhonemeLength;
-                        voicevoxaq.postPhonemeLength = param.postPhonemeLength;
-                        voicevoxaq.outputSamplingRate = param.outputSamplingRate;
-                    }
-
-                    AsyncPostVoiceVoxSynthesisQuery(voicevoxaq, speaker);
+                    AsyncPostVoiceVoxSynthesisQuery(GetAudioQuery(speaker, param, text) as VoiceVoxAudioQuery, speaker);
                     break;
             }
 
@@ -510,51 +470,6 @@ namespace voxsay2
             return ans;
         }
 
-        private bool PostVoiceVoxFrameSynthesisQuery(VoiceVoxFrameAudioQuery query, int speaker, string saveFileName)
-        {
-            var json = new DataContractJsonSerializer(typeof(VoiceVoxFrameAudioQuery));
-            MemoryStream ms = new MemoryStream();
-            bool ans = true;
-
-            json.WriteObject(ms, query);
-
-            var content = new StringContent(Encoding.UTF8.GetString(ms.ToArray()), Encoding.UTF8, "application/json");
-
-            Task.Run(async () => {
-
-                SettingJsonHeader();
-
-                try
-                {
-                    var response = await ConClient.PostAsync(string.Format(@"{0}/frame_synthesis?speaker={1}", BaseUri, speaker), content);
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        string tempFileName = saveFileName == "" ? Path.GetTempFileName() : saveFileName;
-
-                        using (FileStream tempfile = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            await response.Content.CopyToAsync(tempfile);
-                        }
-
-                        if (saveFileName == "")
-                        {
-                            PlayWaveFile(tempFileName);
-                            File.Delete(tempFileName);
-                        }
-
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("PostVoiceVoxFrameSynthesisQuery:{0}", e.Message);
-                    ans = false;
-                }
-            }).Wait();
-
-            return ans;
-        }
-
         private bool PostCoeiroinkv2SynthesisQuery(Coeiroinkv2AudioQuery aq, int speaker, string saveFileName)
         {
             var json = new DataContractJsonSerializer(typeof(Coeiroinkv2AudioQuery));
@@ -593,6 +508,96 @@ namespace voxsay2
                 catch (Exception e)
                 {
                     Console.WriteLine("PostCoeiroinkv2SynthesisQuery:{0}", e.Message);
+                    ans = false;
+                }
+            }).Wait();
+
+            return ans;
+        }
+
+        private bool PostAivisSpeechSynthesisQuery(AivisSpeechAudioQuery aq, int speaker, string saveFileName)
+        {
+            var json = new DataContractJsonSerializer(typeof(AivisSpeechAudioQuery));
+            MemoryStream ms = new MemoryStream();
+            bool ans = true;
+
+            json.WriteObject(ms, aq);
+
+            var content = new StringContent(Encoding.UTF8.GetString(ms.ToArray()), Encoding.UTF8, "application/json");
+
+            Task.Run(async () => {
+
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.PostAsync(string.Format(@"{0}/synthesis?speaker={1}", BaseUri, speaker), content);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        string tempFileName = saveFileName == "" ? Path.GetTempFileName() : saveFileName;
+
+                        using (FileStream tempfile = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            await response.Content.CopyToAsync(tempfile);
+                        }
+
+                        if (saveFileName == "")
+                        {
+                            PlayWaveFile(tempFileName);
+                            File.Delete(tempFileName);
+                        }
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("PostAivisSpeechSynthesisQuery:{0}", e.Message);
+                    ans = false;
+                }
+            }).Wait();
+
+            return ans;
+        }
+
+        private bool PostVoiceVoxFrameSynthesisQuery(VoiceVoxFrameAudioQuery query, int speaker, string saveFileName)
+        {
+            var json = new DataContractJsonSerializer(typeof(VoiceVoxFrameAudioQuery));
+            MemoryStream ms = new MemoryStream();
+            bool ans = true;
+
+            json.WriteObject(ms, query);
+
+            var content = new StringContent(Encoding.UTF8.GetString(ms.ToArray()), Encoding.UTF8, "application/json");
+
+            Task.Run(async () => {
+
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.PostAsync(string.Format(@"{0}/frame_synthesis?speaker={1}", BaseUri, speaker), content);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        string tempFileName = saveFileName == "" ? Path.GetTempFileName() : saveFileName;
+
+                        using (FileStream tempfile = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            await response.Content.CopyToAsync(tempfile);
+                        }
+
+                        if (saveFileName == "")
+                        {
+                            PlayWaveFile(tempFileName);
+                            File.Delete(tempFileName);
+                        }
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("PostVoiceVoxFrameSynthesisQuery:{0}", e.Message);
                     ans = false;
                 }
             }).Wait();
@@ -714,6 +719,102 @@ namespace voxsay2
 
         }
 
+        private void AsyncPostAivisSpeechSynthesisQuery(AivisSpeechAudioQuery aq, int speaker)
+        {
+            var json = new DataContractJsonSerializer(typeof(AivisSpeechAudioQuery));
+            MemoryStream ms = new MemoryStream();
+
+            json.WriteObject(ms, aq);
+
+            var content = new StringContent(Encoding.UTF8.GetString(ms.ToArray()), Encoding.UTF8, "application/json");
+
+            Task.Run(async () => {
+
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.PostAsync(string.Format(@"{0}/synthesis?speaker={1}", BaseUri, speaker), content);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        string tempFileName = Path.GetTempFileName();
+
+                        using (FileStream tempfile = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            await response.Content.CopyToAsync(tempfile);
+                        }
+
+                        PlayWaveFile(tempFileName);
+                        File.Delete(tempFileName);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("AsyncPostAivisSpeechSynthesisQuery:{0}", e.Message);
+                }
+            });
+
+        }
+
+        private AudioQuery GetAudioQuery(int speaker, SpeakerParams param, string text)
+        {
+            switch (SelectedProdinfo.Product)
+            {
+                case ProdnameEnum.coeiroinkv2:
+                    var coeiroinkv2aq = GetCoeiroinkv2AudioQuery(text, speaker);
+
+                    if ((coeiroinkv2aq != null) && (param != null))
+                    {
+                        coeiroinkv2aq.volumeScale = ((Coeiroinkv2Params)param).volumeScale;
+                        coeiroinkv2aq.intonationScale = ((Coeiroinkv2Params)param).intonationScale;
+                        coeiroinkv2aq.pitchScale = ((Coeiroinkv2Params)param).pitchScale;
+                        coeiroinkv2aq.speedScale = ((Coeiroinkv2Params)param).speedScale;
+                        coeiroinkv2aq.prePhonemeLength = ((Coeiroinkv2Params)param).prePhonemeLength;
+                        coeiroinkv2aq.postPhonemeLength = ((Coeiroinkv2Params)param).postPhonemeLength;
+                        coeiroinkv2aq.outputSamplingRate = ((Coeiroinkv2Params)param).outputSamplingRate;
+                    }
+
+                    return coeiroinkv2aq;
+
+                case ProdnameEnum.aivisspeech:
+                    var aivisspeechaq = GetAivisSpeechAudioQuery(text, speaker);
+
+                    if ((aivisspeechaq != null) && (param != null))
+                    {
+                        aivisspeechaq.volumeScale = ((AivisSpeechParams)param).volumeScale;
+                        aivisspeechaq.intonationScale = ((AivisSpeechParams)param).intonationScale;
+                        aivisspeechaq.pitchScale = ((AivisSpeechParams)param).pitchScale;
+                        aivisspeechaq.speedScale = ((AivisSpeechParams)param).speedScale;
+                        aivisspeechaq.prePhonemeLength = ((AivisSpeechParams)param).prePhonemeLength;
+                        aivisspeechaq.postPhonemeLength = ((AivisSpeechParams)param).postPhonemeLength;
+                        aivisspeechaq.tempoDynamicsScale = ((AivisSpeechParams)param).tempodynamicsScale;
+                        aivisspeechaq.pauseLength = ((AivisSpeechParams)param).pauselengthScale;
+                        aivisspeechaq.outputSamplingRate = ((AivisSpeechParams)param).outputSamplingRate;
+                    }
+
+                    return aivisspeechaq;
+
+                default:
+                    var voicevoxaq = GetVoiceVoxAudioQuery(text, speaker);
+
+                    if ((voicevoxaq != null) && (param != null))
+                    {
+                        voicevoxaq.volumeScale = ((VoiceVoxParams)param).volumeScale;
+                        voicevoxaq.intonationScale = ((VoiceVoxParams)param).intonationScale;
+                        voicevoxaq.pitchScale = ((VoiceVoxParams)param).pitchScale;
+                        voicevoxaq.speedScale = ((VoiceVoxParams)param).speedScale;
+                        voicevoxaq.prePhonemeLength = ((VoiceVoxParams)param).prePhonemeLength;
+                        voicevoxaq.postPhonemeLength = ((VoiceVoxParams)param).postPhonemeLength;
+                        voicevoxaq.outputSamplingRate = ((VoiceVoxParams)param).outputSamplingRate;
+                    }
+
+                    return voicevoxaq;
+            }
+
+            return null;
+        }
+
         private VoiceVoxAudioQuery GetVoiceVoxAudioQuery(string text, int speaker)
         {
             string url = string.Format(@"{0}/audio_query?text={1}&speaker={2}", BaseUri, text, speaker);
@@ -733,50 +834,12 @@ namespace voxsay2
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var json = new DataContractJsonSerializer(typeof(VoiceVoxAudioQuery), settings);
-                        ans = (VoiceVoxAudioQuery)json.ReadObject(await response.Content.ReadAsStreamAsync());
+                        ans = json.ReadObject(await response.Content.ReadAsStreamAsync()) as VoiceVoxAudioQuery;
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("GetVoiceVoxAudioQuery:{0}", e.Message);
-                    ans = null;
-                }
-            }).Wait();
-
-            return ans;
-        }
-
-        private VoiceVoxFrameAudioQuery GetVoiceVoxFrameAudioQuery(VoiceVoxNotes mynotes, int speaker)
-        {
-            string url = string.Format(@"{0}/sing_frame_audio_query?speaker={1}", BaseUri, speaker);
-            DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
-            VoiceVoxFrameAudioQuery ans = null;
-
-            settings.UseSimpleDictionaryFormat = true;
-
-            var jsonNotes = new DataContractJsonSerializer(typeof(List<VoiceVoxNotes>));
-            MemoryStream ms = new MemoryStream();
-
-            jsonNotes.WriteObject(ms, mynotes);
-
-            var content = new StringContent(Encoding.UTF8.GetString(ms.ToArray()), Encoding.UTF8, "application/json");
-
-            Task.Run(async () => {
-                SettingJsonHeader();
-
-                try
-                {
-                    var response = await ConClient.PostAsync(url, content);
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        var json = new DataContractJsonSerializer(typeof(VoiceVoxFrameAudioQuery), settings);
-                        ans = (VoiceVoxFrameAudioQuery)json.ReadObject(await response.Content.ReadAsStreamAsync());
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("GetVoiceVoxFrameAudioQuery:{0}", e.Message);
                     ans = null;
                 }
             }).Wait();
@@ -811,7 +874,7 @@ namespace voxsay2
                     if (response1.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var json = new DataContractJsonSerializer(typeof(Coeiroinkv2StyleidToSpeakerMeta), settings);
-                        speakerinfo = (Coeiroinkv2StyleidToSpeakerMeta)json.ReadObject(await response1.Content.ReadAsStreamAsync());
+                        speakerinfo = json.ReadObject(await response1.Content.ReadAsStreamAsync()) as Coeiroinkv2StyleidToSpeakerMeta;
 
                         ans.speakerUuid = speakerinfo.speakerUuid;
                         ans.styleId = speakerinfo.styleId;
@@ -822,7 +885,7 @@ namespace voxsay2
                     if (response2.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var json = new DataContractJsonSerializer(typeof(Coeiroinkv2Prosody), settings);
-                        prosody = (Coeiroinkv2Prosody)json.ReadObject(await response2.Content.ReadAsStreamAsync());
+                        prosody = json.ReadObject(await response2.Content.ReadAsStreamAsync()) as Coeiroinkv2Prosody;
                         ans.prosodyDetail = prosody.detail.ToList();
                     }
 
@@ -838,7 +901,77 @@ namespace voxsay2
             return ans;
         }
 
-        private List<KeyValuePair<int, string>> VoiceVoxAvailableCasts()
+        private AivisSpeechAudioQuery GetAivisSpeechAudioQuery(string text, int speaker)
+        {
+            string url = string.Format(@"{0}/audio_query?text={1}&speaker={2}", BaseUri, text, speaker);
+            var content = new StringContent("{}", Encoding.UTF8, @"application/json");
+            DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
+            AivisSpeechAudioQuery ans = null;
+
+            settings.UseSimpleDictionaryFormat = true;
+
+            Task.Run(async () => {
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.PostAsync(url, content);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var json = new DataContractJsonSerializer(typeof(AivisSpeechAudioQuery), settings);
+                        ans = json.ReadObject(await response.Content.ReadAsStreamAsync()) as AivisSpeechAudioQuery;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("GetAivisSpeechAudioQuery:{0}", e.Message);
+                    ans = null;
+                }
+            }).Wait();
+
+            return ans;
+        }
+
+        private VoiceVoxFrameAudioQuery GetVoiceVoxFrameAudioQuery(VoiceVoxNotes mynotes, int speaker)
+        {
+            string url = string.Format(@"{0}/sing_frame_audio_query?speaker={1}", BaseUri, speaker);
+            DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
+            VoiceVoxFrameAudioQuery ans = null;
+
+            settings.UseSimpleDictionaryFormat = true;
+
+            var jsonNotes = new DataContractJsonSerializer(typeof(List<VoiceVoxNotes>));
+            MemoryStream ms = new MemoryStream();
+
+            jsonNotes.WriteObject(ms, mynotes);
+
+            var content = new StringContent(Encoding.UTF8.GetString(ms.ToArray()), Encoding.UTF8, "application/json");
+
+            Task.Run(async () => {
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.PostAsync(url, content);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var json = new DataContractJsonSerializer(typeof(VoiceVoxFrameAudioQuery), settings);
+                        ans = json.ReadObject(await response.Content.ReadAsStreamAsync()) as VoiceVoxFrameAudioQuery;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("GetVoiceVoxFrameAudioQuery:{0}", e.Message);
+                    ans = null;
+                }
+            }).Wait();
+
+            return ans;
+        }
+
+        private List<KeyValuePair<int, string>> GetVoiceVoxAvailableCasts()
         {
             DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
             List<VoiceVoxSpeaker> speakers = new List<VoiceVoxSpeaker>();
@@ -855,7 +988,7 @@ namespace voxsay2
                     {
                         var json = new DataContractJsonSerializer(typeof(List<VoiceVoxSpeaker>), settings);
 
-                        speakers = (List<VoiceVoxSpeaker>)json.ReadObject(await response.Content.ReadAsStreamAsync());
+                        speakers = json.ReadObject(await response.Content.ReadAsStreamAsync()) as List<VoiceVoxSpeaker>;
 
                         ans = speakers.SelectMany(v1 => v1.styles.Select(v2 => new { id = v2.Id, speaker_uuid = v1.speaker_uuid, name = string.Format("{0}（{1}）", v1.name, v2.Name) }))
                                       .OrderBy(v => v.id)
@@ -871,6 +1004,75 @@ namespace voxsay2
 
             return ans;
         }
+
+        private List<KeyValuePair<int, string>> GetCoeiroinkv2AvailableCasts()
+        {
+            DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
+            var speakers = new List<Coeiroinkv2Speaker>();
+            var ans = new List<KeyValuePair<int, string>>();
+
+            Task.Run(async () => {
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.GetAsync(string.Format("{0}/speakers", BaseUri));
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var json = new DataContractJsonSerializer(typeof(List<Coeiroinkv2Speaker>), settings);
+
+                        speakers = json.ReadObject(await response.Content.ReadAsStreamAsync()) as List<Coeiroinkv2Speaker>;
+
+                        ans = speakers.SelectMany(v1 => v1.styles.Select(v2 => new { id = v2.Id, speaker_uuid = v1.speaker_uuid, name = string.Format("{0}（{1}）", v1.name, v2.Name) }))
+                                      .OrderBy(v => v.id)
+                                      .Select(v => new KeyValuePair<int, string>(v.id, v.name)).ToList();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Coeiroinkv2AvailableCasts:{0}", e.Message);
+                    ans = null;
+                }
+            }).Wait();
+
+            return ans;
+        }
+
+        private List<KeyValuePair<int, string>> GetAivisSpeechAvailableCasts()
+        {
+            DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
+            List<AivisSpeechSpeaker> speakers = new List<AivisSpeechSpeaker>();
+            var ans = new List<KeyValuePair<int, string>>();
+
+            Task.Run(async () => {
+                SettingJsonHeader();
+
+                try
+                {
+                    var response = await ConClient.GetAsync(string.Format("{0}/speakers", BaseUri));
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var json = new DataContractJsonSerializer(typeof(List<AivisSpeechSpeaker>), settings);
+
+                        speakers = json.ReadObject(await response.Content.ReadAsStreamAsync()) as List<AivisSpeechSpeaker>;
+
+                        ans = speakers.SelectMany(v1 => v1.Styles.Select(v2 => ( id: v2.Id, name: string.Format("{0}（{1}）", v1.Name, v2.Name) )))
+                                      .OrderBy(v => v.id)
+                                      .Select(v => new KeyValuePair<int, string>(v.id, v.name)).ToList();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("AivisSpeechAvailableCasts:{0}", e.Message);
+                    ans = null;
+                }
+            }).Wait();
+
+            return ans;
+        }
+
         private List<KeyValuePair<int, string>> VoiceVoxAvailableSingTeachers()
         {
             DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
@@ -888,7 +1090,7 @@ namespace voxsay2
                     {
                         var json = new DataContractJsonSerializer(typeof(List<VoiceVoxSingers>), settings);
 
-                        speakers = (List<VoiceVoxSingers>)json.ReadObject(await response.Content.ReadAsStreamAsync());
+                        speakers = json.ReadObject(await response.Content.ReadAsStreamAsync()) as List<VoiceVoxSingers>;
 
                         ans = speakers.SelectMany(v1 => v1.Styles.Select(v2 => new { id = v2.Id, singtype=v2.SingType, speaker_uuid = v1.Speaker_uuid, name = string.Format("{0}（{1}）", v1.Name, v2.Name) }))
                                       .Where(v => v.singtype == "sing" || v.singtype == "singing_teacher")
@@ -923,7 +1125,7 @@ namespace voxsay2
                     {
                         var json = new DataContractJsonSerializer(typeof(List<VoiceVoxSingers>), settings);
 
-                        speakers = (List<VoiceVoxSingers>)json.ReadObject(await response.Content.ReadAsStreamAsync());
+                        speakers = json.ReadObject(await response.Content.ReadAsStreamAsync()) as List<VoiceVoxSingers>;
 
                         ans = speakers.SelectMany(v1 => v1.Styles.Select(v2 => new { id = v2.Id, speaker_uuid = v1.Speaker_uuid, name = string.Format("{0}（{1}）", v1.Name, v2.Name) }))
                                       .OrderBy(v => v.id)
@@ -933,40 +1135,6 @@ namespace voxsay2
                 catch (Exception e)
                 {
                     Console.WriteLine("VoiceVoxAvailableSingers:{0}", e.Message);
-                    ans = null;
-                }
-            }).Wait();
-
-            return ans;
-        }
-
-        private List<KeyValuePair<int, string>> Coeiroinkv2AvailableCasts()
-        {
-            DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
-            var speakers = new List<Coeiroinkv2Speaker>();
-            var ans = new List<KeyValuePair<int, string>>();
-
-            Task.Run(async () => {
-                SettingJsonHeader();
-
-                try
-                {
-                    var response = await ConClient.GetAsync(string.Format("{0}/speakers", BaseUri));
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        var json = new DataContractJsonSerializer(typeof(List<Coeiroinkv2Speaker>), settings);
-
-                        speakers = (List<Coeiroinkv2Speaker>)json.ReadObject(await response.Content.ReadAsStreamAsync());
-
-                        ans = speakers.SelectMany(v1 => v1.styles.Select(v2 => new { id = v2.Id, speaker_uuid = v1.speaker_uuid, name = string.Format("{0}（{1}）", v1.name, v2.Name) }))
-                                      .OrderBy(v => v.id)
-                                      .Select(v => new KeyValuePair<int, string>(v.id, v.name)).ToList();
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Coeiroinkv2AvailableCasts:{0}", e.Message);
                     ans = null;
                 }
             }).Wait();

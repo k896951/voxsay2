@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace voxsay2
+namespace voxsay2.common
 {
     public class SpeakerParams
     {

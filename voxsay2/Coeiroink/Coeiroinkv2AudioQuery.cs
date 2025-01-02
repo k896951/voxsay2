@@ -4,11 +4,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using voxsay2.common;
 
-namespace voxsay2
+namespace voxsay2.Coeiroink
 {
     [DataContract]
-    public class Coeiroinkv2AudioQuery
+    public class Coeiroinkv2AudioQuery : AudioQuery
     {
         [DataMember]
         public string speakerUuid { get; set; }
@@ -21,27 +22,6 @@ namespace voxsay2
 
         [DataMember]
         public List<List<Coeiroinkv2ProsodyDetail>> prosodyDetail { get; set; }
-
-        [DataMember]
-        public double? speedScale { get; set; }
-
-        [DataMember]
-        public double? pitchScale { get; set; }
-
-        [DataMember]
-        public double? intonationScale { get; set; }
-
-        [DataMember]
-        public double? volumeScale { get; set; }
-
-        [DataMember]
-        public double? prePhonemeLength { get; set; }
-
-        [DataMember]
-        public double? postPhonemeLength { get; set; }
-
-        [DataMember]
-        public int? outputSamplingRate { get; set; }
 
         [DataMember]
         public bool outputStereo { get; set; }

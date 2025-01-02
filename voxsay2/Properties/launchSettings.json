@@ -2,7 +2,7 @@
   "profiles": {
     "voxsay2": {
       "commandName": "Project",
-      "commandLineArgs": "-renderingmode sing -teacherlist"
+      "commandLineArgs": "-prod aivisspeech -tempodynamics 2 -pauselength 2 -index 888753761 -t あわわわ。夜になってました。"
     }
   }
 }

@@ -2,6 +2,8 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using voxsay2.AivisSpeech;
+using voxsay2.common;
 
 namespace voxsay2
 {
@@ -18,7 +20,7 @@ namespace voxsay2
             // 稼働している音声合成製品一覧表示（標準指定）
             if (opt.IsRequestActiveProductList)
             {
-                foreach (var item in ApiProxy.ConnectivityList())
+                foreach (var item in ApiProxy.GetConnectivityList())
                 {
                     Console.WriteLine(string.Format(@"product: {0}", item.ToString()));
                 }
@@ -27,7 +29,7 @@ namespace voxsay2
             }
 
             // 知らない製品が指定された
-            if(!ApiProxy.IsValidProduct(opt.SpecifiedProduct))
+            if ((opt.SpecifiedProduct is null)||(!ApiProxy.IsValidProduct(opt.SpecifiedProduct)))
             {
                 Console.WriteLine(String.Format(@"Error: Unknown product {0}", opt.SpecifiedProduct));
                 return 8;
@@ -50,7 +52,7 @@ namespace voxsay2
                 switch (opt.RenderingMode)
                 {
                     case "sing":
-                        foreach (var item in api.AvailableSingers())
+                        foreach (var item in api.GetAvailableSingers())
                         {
                             Console.WriteLine(string.Format(@"index: {0},  speaker:{1}", item.Key, item.Value));
                         }
@@ -58,7 +60,7 @@ namespace voxsay2
 
                     case "talk":
                     default:
-                        foreach (var item in api.AvailableCasts())
+                        foreach (var item in api.GetAvailableCasts())
                         {
                             Console.WriteLine(string.Format(@"index: {0},  speaker:{1}", item.Key, item.Value));
                         }
@@ -71,7 +73,7 @@ namespace voxsay2
             // SingTeacher一覧表示
             if (opt.IsRequestSingTeacherList)
             {
-                foreach (var item in api.AvailableSingTeachers())
+                foreach (var item in api.GetAvailableSingTeachers())
                 {
                     Console.WriteLine(string.Format(@"index: {0},  speaker:{1}", item.Key, item.Value));
                 }
@@ -82,16 +84,7 @@ namespace voxsay2
             // 発声もしくは保存処理
             if (opt.Index != null)
             {
-                SpeakerParams pm = api.GetAvatorParams((int)opt.Index);
-                if (opt.SpeedScale != null) pm.speedScale = (double)opt.SpeedScale;
-                if (opt.PitchScale != null) pm.pitchScale = (double)opt.PitchScale;
-                if (opt.VolumeScale != null) pm.volumeScale = (double)opt.VolumeScale;
-                if (opt.IntonationScale != null) pm.intonationScale = (double)opt.IntonationScale;
-                if (opt.PrePhonemeLength != null) pm.prePhonemeLength = (double)opt.PrePhonemeLength;
-                if (opt.PostPhonemeLength != null) pm.postPhonemeLength = (double)opt.PostPhonemeLength;
-                if (opt.OutputSamplingRate != null) pm.outputSamplingRate = (int)opt.OutputSamplingRate;
-
-                // とりあえずの呼び出し処理を追加
+                SpeakerParams pm = CopyParamsFromOpts(ref api, ref opt);
 
                 if (opt.RenderingMode == "sing")
                 {
@@ -124,6 +117,26 @@ namespace voxsay2
             return rcd;
         }
 
+        private static SpeakerParams CopyParamsFromOpts(ref ApiProxy api, ref Opts opt)
+        {
+            SpeakerParams pm = api.GetAvatorParams();
+            if (opt.SpeedScale != null) pm.speedScale = (double)opt.SpeedScale;
+            if (opt.PitchScale != null) pm.pitchScale = (double)opt.PitchScale;
+            if (opt.VolumeScale != null) pm.volumeScale = (double)opt.VolumeScale;
+            if (opt.IntonationScale != null) pm.intonationScale = (double)opt.IntonationScale;
+            if (opt.PrePhonemeLength != null) pm.prePhonemeLength = (double)opt.PrePhonemeLength;
+            if (opt.PostPhonemeLength != null) pm.postPhonemeLength = (double)opt.PostPhonemeLength;
+            if (opt.OutputSamplingRate != null) pm.outputSamplingRate = (int)opt.OutputSamplingRate;
+
+            if (opt.SpecifiedProduct == "aivisspeech")
+            {
+                if (opt.TempoDynamicsScale != null) ((AivisSpeechParams)pm).tempodynamicsScale = (double)opt.TempoDynamicsScale;
+                if (opt.PauselengthScale != null) ((AivisSpeechParams)pm).pauselengthScale = (double)opt.PauselengthScale;
+            }
+
+            return pm;
+        }
+
         private static string GenFilename(string filename)
         {
             Regex ext = new Regex(@"\.[wW][aA][vV][eE]{0,1}$");
@@ -146,7 +159,7 @@ namespace voxsay2
 
             if (("" + opt.Inputfilename) == "")
             {
-                if (opt.SaveFile != null)
+                if ((opt.SaveFile != null)&&(opt.SaveFile != ""))
                 {
                     if (!api.Save((int)opt.Index, pm, opt.TalkText, GenFilename(opt.SaveFile))) rcd = 8;
                 }
@@ -181,7 +194,7 @@ namespace voxsay2
                                 sb.AppendLine(sr.ReadLine());
                             }
 
-                            if (opt.SaveFile != null)
+                            if ((opt.SaveFile != null) && (opt.SaveFile != ""))
                             {
                                 if (!api.Save((int)opt.Index, pm, sb.ToString(), GenFilename(opt.SaveFile))) rcd = 8;
                             }
@@ -197,7 +210,7 @@ namespace voxsay2
 
                             while (!sr.EndOfStream)
                             {
-                                if (opt.SaveFile != null)
+                                if ((opt.SaveFile != null) && (opt.SaveFile != ""))
                                 {
                                     if (!api.Save((int)opt.Index, pm, sr.ReadLine(), GenFilename(opt.SaveFile, fileTailNumber))) rcd = 8;
                                 }
@@ -237,7 +250,7 @@ namespace voxsay2
                 if (opt.ExportNote) File.WriteAllText(scorefilename, mmlObj.ExportNotes(notes));
                 if (opt.PrintNote) mmlObj.PrintAssignInfo(notes);
 
-                if (opt.SaveFile != null)
+                if ((opt.SaveFile != null) && (opt.SaveFile != ""))
                 {
                     if (!api.SaveSong((int)opt.Index, (int)opt.TeacherIndex, pm, notes, GenFilename(opt.SaveFile))) rcd = 8;
                 }
@@ -258,7 +271,7 @@ namespace voxsay2
                         if (opt.ExportNote) File.WriteAllText(scorefilename, mmlObj.ExportNotes(notes));
                         if (opt.PrintNote) mmlObj.PrintAssignInfo(notes);
 
-                        if (opt.SaveFile != null)
+                        if ((opt.SaveFile != null) && (opt.SaveFile != ""))
                         {
                             if (!api.SaveSong((int)opt.Index, (int)opt.TeacherIndex, pm, notes, GenFilename(opt.SaveFile))) rcd = 8;
                         }
@@ -279,7 +292,7 @@ namespace voxsay2
                             {
                                 if (opt.PrintNote) mmlObj.PrintAssignInfo(note, fileTailNumber);
 
-                                if (opt.SaveFile != null)
+                                if ((opt.SaveFile != null) && (opt.SaveFile != ""))
                                 {
                                     if (!api.SaveSong((int)opt.Index, (int)opt.TeacherIndex, pm, note, GenFilename(opt.SaveFile, fileTailNumber))) rcd = 8;
                                 }
